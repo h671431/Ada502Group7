@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  frcm:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./src:/app/src
+    command: python -m uvicorn frcm.web:app --host 0.0.0.0 --port 8000 --reload
