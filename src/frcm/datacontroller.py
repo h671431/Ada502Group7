@@ -26,7 +26,7 @@ async def fetch_met_latest(
     longitude: float,
     altitude: Optional[float] = None,
 ) -> Dict[str, Any]:
-    """Fetch latest weather observation from MET.no.
+    """Fetch latest weather observation from MET.no (most recent data up to now).
 
     Args:
         latitude: Latitude in degrees.
@@ -54,13 +54,32 @@ async def fetch_met_latest(
     if not timeseries:
         raise ValueError("No weather timeseries found in MET response")
 
-    # Get the last (most recent) entry
-    entry = timeseries[-1]
-    timestamp_str = entry.get("time")
+    # Find the most recent entry that is at or before the current time
+    now = datetime.now(datetime.now().astimezone().tzinfo)
+    latest_entry = None
+
+    for entry in timeseries:
+        timestamp_str = entry.get("time")
+        if not timestamp_str:
+            continue
+
+        timestamp = datetime.fromisoformat(timestamp_str.replace("Z", "+00:00"))
+        
+        # Only consider entries up to current time
+        if timestamp <= now:
+            latest_entry = entry
+        else:
+            break  # Since timeseries is sorted, stop when we exceed now
+
+    if not latest_entry:
+        # If no historical data, use the first available entry
+        latest_entry = timeseries[0]
+
+    timestamp_str = latest_entry.get("time")
     if not timestamp_str:
         raise ValueError("No valid timestamp in latest timeseries entry")
 
-    details = entry.get("data", {}).get("instant", {}).get("details", {})
+    details = latest_entry.get("data", {}).get("instant", {}).get("details", {})
     temp = details.get("air_temperature")
     rh = details.get("relative_humidity")
     wind = details.get("wind_speed")
