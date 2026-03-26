@@ -21,7 +21,7 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.NREC_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy site to NREC
+      - name: Deploy to NREC (placeholder)
         run: |
-          scp -i ~/.ssh/id_ed25519 -r site/* \
-            ${{ secrets.NREC_USER }}@${{ secrets.NREC_HOST }}:/var/www/html/
+          echo "Deploy workflow configured."
+          echo "To deploy: Pull latest code on NREC and run 'docker-compose up -d --build'"
