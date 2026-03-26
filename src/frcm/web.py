@@ -78,6 +78,10 @@ def landing_page():
                 <label>Breddegrad (lat):</label>
                 <input type="number" id="latitude" placeholder="f.eks. 60.3" step="0.001" readonly />
             </div>
+            <div>
+                <label>Breddegrad (lat):</label>
+                <input type="number" id="latitude" placeholder="f.eks. 60.3" step="0.001" readonly />
+            </div>
             <div>    
                 <label>Lengdegrad (lon):</label>
                 <input type="number" id="longitude" placeholder="f.eks. 5.3" step="0.001" readonly />
