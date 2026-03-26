@@ -1,20 +1,37 @@
-- name: Deploy to NREC
-  run: |
-    ssh -i ~/.ssh/id_ed25519 "${{ secrets.NREC_USER }}@${{ secrets.NREC_HOST }}" << 'EOF'
-      set -euxo pipefail
+name: Deploy Landing Page
 
-      whoami
-      hostname
-      docker --version || true
-      docker compose version || true
+on:
+  push:
+    branches:
+      - main
 
-      if [ ! -d "$HOME/Ada502Group7/.git" ]; then
-        git clone https://github.com/h671431/Ada502Group7.git "$HOME/Ada502Group7"
-      fi
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-      cd "$HOME/Ada502Group7"
-      git pull origin main
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-      docker compose down || true
-      docker compose up --build -d
-    EOF
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.NREC_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.NREC_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Deploy to NREC
+        run: |
+          ssh -i ~/.ssh/id_ed25519 "${{ secrets.NREC_USER }}@${{ secrets.NREC_HOST }}" << 'EOF'
+          set -euxo pipefail
+
+          if [ ! -d "$HOME/Ada502Group7/.git" ]; then
+            git clone https://github.com/h671431/Ada502Group7.git "$HOME/Ada502Group7"
+          fi
+
+          cd "$HOME/Ada502Group7"
+          git pull origin main
+
+          docker compose down || true
+          docker compose up --build -d
+          EOF
