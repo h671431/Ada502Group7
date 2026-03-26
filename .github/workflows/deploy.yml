@@ -1,37 +1,34 @@
-name: Deploy Landing Page
+# .github/workflows/build.yml
+name: Build
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+  release:
+    types: [created]
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup SSH key
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install build dependencies
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.NREC_SSH_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H "${{ secrets.NREC_HOST }}" >> ~/.ssh/known_hosts
+          python -m pip install --upgrade pip
+          pip install build wheel uv
 
-      - name: Deploy to NREC
-        run: |
-          ssh -i ~/.ssh/id_ed25519 "${{ secrets.NREC_USER }}@${{ secrets.NREC_HOST }}" << 'EOF'
-            set -euxo pipefail
+      - name: Build package
+        run: python -m build
 
-            if [ ! -d "$HOME/Ada502Group7/.git" ]; then
-              git clone https://github.com/h671431/Ada502Group7.git "$HOME/Ada502Group7"
-            fi
-
-            cd "$HOME/Ada502Group7"
-            git pull origin main
-
-            docker compose down || true
-            docker compose up --build -d
-          EOF
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-packages
+          path: dist/
