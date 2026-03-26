@@ -23,15 +23,15 @@ jobs:
       - name: Deploy to NREC
         run: |
           ssh -i ~/.ssh/id_ed25519 "${{ secrets.NREC_USER }}@${{ secrets.NREC_HOST }}" << 'EOF'
-          set -euxo pipefail
+            set -euxo pipefail
 
-          if [ ! -d "$HOME/Ada502Group7/.git" ]; then
-            git clone https://github.com/h671431/Ada502Group7.git "$HOME/Ada502Group7"
-          fi
+            if [ ! -d "$HOME/Ada502Group7/.git" ]; then
+              git clone https://github.com/h671431/Ada502Group7.git "$HOME/Ada502Group7"
+            fi
 
-          cd "$HOME/Ada502Group7"
-          git pull origin main
+            cd "$HOME/Ada502Group7"
+            git pull origin main
 
-          docker compose down || true
-          docker compose up --build -d
+            docker compose down || true
+            docker compose up --build -d
           EOF
