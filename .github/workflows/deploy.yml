@@ -22,21 +22,35 @@ jobs:
 
       - name: Deploy to NREC
         run: |
-          ssh -i ~/.ssh/id_ed25519 "${{ secrets.NREC_USER }}@${{ secrets.NREC_HOST }}" <<'EOF'
+          ssh -v -i ~/.ssh/id_ed25519 "${{ secrets.NREC_USER }}@${{ secrets.NREC_HOST }}" <<'EOF'
             set -euxo pipefail
 
-            echo "Connected to $(hostname)"
+            echo "=== SERVER INFO ==="
+            hostname
             whoami
+            pwd
+            ls -la ~
+
+            echo "=== TOOLS ==="
+            git --version
             docker --version || true
             docker compose version || true
+            docker-compose --version || true
 
+            echo "=== REPO ==="
             if [ ! -d "$HOME/Ada502Group7/.git" ]; then
               git clone https://github.com/h671431/Ada502Group7.git "$HOME/Ada502Group7"
             fi
 
             cd "$HOME/Ada502Group7"
+            git status || true
             git pull origin main
 
+            echo "=== FILES ==="
+            ls -la
+            ls -la docker-compose.yml docker-compose.yaml compose.yml compose.yaml || true
+
+            echo "=== DOCKER ==="
             docker compose down || true
             docker compose up --build -d
           EOF
