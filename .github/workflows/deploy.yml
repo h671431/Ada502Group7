@@ -7,8 +7,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout repo
@@ -21,7 +19,12 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.NREC_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy to NREC (placeholder)
+      - name: Deploy to NREC
         run: |
-          echo "Deploy workflow configured."
-          echo "To deploy: Pull latest code on NREC and run 'docker-compose up -d --build'"
+          ssh -i ~/.ssh/id_ed25519 ${{ secrets.NREC_USER }}@${{ secrets.NREC_HOST }} << 'EOF'
+            cd ~/Ada502Group7 || git clone https://github.com/h671431/Ada502Group7.git
+            cd Ada502Group7
+            git pull
+            sudo docker compose down
+            sudo docker compose up --build -d
+          EOF
