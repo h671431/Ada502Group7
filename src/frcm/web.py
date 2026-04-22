@@ -531,9 +531,15 @@ async def get_forecast(
         )
     
     try:
-        # Fetch weather data
-        weather_response = await get_weather(latitude=lat, longitude=lon)
+        # Fetch 7 days of weather data for fire risk computation
+        # (Fire risk model needs multiple data points to simulate wood moisture changes over time)
+        weather_response = await get_weather(latitude=lat, longitude=lon, days=7)
         weather_data = weather_response["weather"]
+        
+        if not weather_data or len(weather_data) < 2:
+            raise ValueError(f"Insufficient weather data: got {len(weather_data)} points, need at least 2 for fire risk computation")
+        
+        logger.info(f"Computing fire risk with {len(weather_data)} weather data points for lat={lat}, lon={lon}")
         
         # Convert to WeatherData format
         from frcm.datamodel.utils import list_to_wdps
@@ -543,12 +549,13 @@ async def get_forecast(
         # Calculate fire risk
         fire_risk = compute(weather_obj)
         
-        logger.info(f"Successfully computed fire risk for {location or f'({lat}, {lon})'}")
+        logger.info(f"Successfully computed fire risk with {len(fire_risk.firerisks)} TTF values for {location or f'({lat}, {lon})'}")
         
         return {
             "location": location or f"({lat}, {lon})",
             "latitude": lat,
             "longitude": lon,
+            "data_points": len(weather_data),
             "forecast": [
                 {
                     "timestamp": risk.timestamp.isoformat(),
