@@ -252,9 +252,8 @@ def landing_page():
                     </div>
                     
                     <div id="fireriskDisplay" class="result">
-                        <h3>🔥 Brannrisiko (TTF - Time To Ignition)</h3>
+                        <h3>Brannrisiko</h3>
                         <div class="firerisk-item">
-                            <div class="ttf-label">Tid til selvtenning (timer)</div>
                             <div class="ttf-value" id="result-ttf">-</div>
                             <div id="result-risk-level" class="risk-level">-</div>
                         </div>
@@ -396,7 +395,7 @@ def landing_page():
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'TTF (Timer til selvtenning)',
+                        label: 'TTF',
                         data: data,
                         borderColor: '#667eea',
                         backgroundColor: 'rgba(102, 126, 234, 0.1)',
