@@ -31,7 +31,6 @@ def landing_page():
     <title>FireGuard - Brannrisiko Prognose</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
@@ -172,8 +171,6 @@ def landing_page():
         .risk-medium { background: #f39c12; }
         .risk-low { background: #27ae60; }
         
-        #forecastChart { margin-top: 20px; }
-        
         .loading {
             display: none;
             text-align: center;
@@ -217,9 +214,6 @@ def landing_page():
                 
                 <label for="longitude">Lengdegrad (lon):</label>
                 <input type="number" id="longitude" placeholder="f.eks. 5.3" step="0.001" readonly />
-                
-                <label for="altitude">Høyde (meter, valgfritt):</label>
-                <input type="number" id="altitude" placeholder="f.eks. 50" step="1" />
                 
                 <button onclick="fetchWeatherAndRisk()">Beregn brannrisiko</button>
                 
@@ -267,18 +261,9 @@ def landing_page():
                 <div id="errorResult" class="result error"></div>
             </div>
         </div>
-        
-        <div class="panel" style="margin-top: 20px;">
-            <h2>7-dagars brannrisikoprognose</h2>
-            <div style="position: relative; height: 300px;">
-                <canvas id="forecastChart"></canvas>
-            </div>
-        </div>
-    </div>
+
 
     <script>
-        let forecastChart = null;
-        
         // Initialize map
         const map = L.map('map').setView([60.5, 10.5], 5);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -310,7 +295,6 @@ def landing_page():
         async function fetchWeatherAndRisk() {
             const lat = document.getElementById('latitude').value;
             const lon = document.getElementById('longitude').value;
-            const alt = document.getElementById('altitude').value;
             
             if (!lat || !lon) {
                 alert('Vennligst velg en lokasjon på kartet');
@@ -324,7 +308,7 @@ def landing_page():
             
             try {
                 // Fetch latest weather and fire risk
-                const weatherUrl = `/api/weather/latest?latitude=${lat}&longitude=${lon}${alt ? '&altitude=' + alt : ''}`;
+                const weatherUrl = `/api/weather/latest?latitude=${lat}&longitude=${lon}`;
                 const weatherResponse = await fetch(weatherUrl);
                 
                 if (!weatherResponse.ok) {
@@ -364,8 +348,6 @@ def landing_page():
                     
                     document.getElementById('fireriskDisplay').classList.add('show');
                     
-                    // Update forecast chart
-                    updateForecastChart(forecastData.forecast);
                 } else {
                     throw new Error('Ingen brannrisikodata tilgjengelig');
                 }
@@ -377,53 +359,6 @@ def landing_page():
             } finally {
                 document.getElementById('loading').classList.remove('show');
             }
-        }
-
-        function updateForecastChart(forecast) {
-            const ctx = document.getElementById('forecastChart').getContext('2d');
-            
-            const labels = forecast.slice(0, 24).map((f, i) => `+${i}h`);
-            const data = forecast.slice(0, 24).map(f => f.ttf);
-            
-            if (forecastChart) {
-                forecastChart.destroy();
-            }
-            
-            forecastChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'TTF',
-                        data: data,
-                        borderColor: '#667eea',
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                        tension: 0.4,
-                        fill: true,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#667eea',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: true,
-                            labels: { font: { size: 12 } }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 10,
-                            ticks: { stepSize: 2 }
-                        }
-                    }
-                }
-            });
         }
     </script>
 
@@ -573,8 +508,8 @@ async def get_forecast(
         current_weather_obj = WeatherData(data=current_data_points)
         current_fire_risk = compute(current_weather_obj)
         
-        # Extract current TTF (first value computed from current conditions)
-        current_ttf = current_fire_risk.firerisks[0].ttf if current_fire_risk.firerisks else None
+        # Extract current TTF (use the last value which reflects equilibrium based on actual weather conditions)
+        current_ttf = current_fire_risk.firerisks[-1].ttf if current_fire_risk.firerisks else None
         
         logger.info(f"Successfully computed fire risk for {location or f'({lat}, {lon})'}: current_ttf={current_ttf}, forecast_points={len(fire_risk.firerisks)}")
         
