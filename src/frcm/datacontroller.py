@@ -81,7 +81,7 @@ async def fetch_met_latest(
 
     details = latest_entry.get("data", {}).get("instant", {}).get("details", {})
     temp = details.get("air_temperature")
-    rh = details.get("relative_humidity")
+    rh = details.get("relative_humidity")  # MET.no returns as 0-100 percentage
     wind = details.get("wind_speed")
 
     if temp is None or rh is None or wind is None:
@@ -91,7 +91,7 @@ async def fetch_met_latest(
     return {
         "timestamp": timestamp.isoformat(),
         "temperature": temp,
-        "humidity": rh,
+        "humidity": rh / 100.0,  # Convert to 0-1 decimal for fire risk model
         "wind_speed": wind,
     }
 
@@ -146,7 +146,7 @@ async def fetch_met_forecast(
 
         details = entry.get("data", {}).get("instant", {}).get("details", {})
         temp = details.get("air_temperature")
-        rh = details.get("relative_humidity")
+        rh = details.get("relative_humidity")  # MET.no returns as 0-100 percentage
         wind = details.get("wind_speed")
 
         if temp is None or rh is None or wind is None:
@@ -156,7 +156,7 @@ async def fetch_met_forecast(
             {
                 "timestamp": timestamp.isoformat(),
                 "temperature": temp,
-                "humidity": rh,
+                "humidity": rh / 100.0,  # Convert to 0-1 decimal for fire risk model
                 "wind_speed": wind,
             }
         )
