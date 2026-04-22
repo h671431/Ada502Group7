@@ -353,9 +353,8 @@ def landing_page():
                 
                 const forecastData = await forecastResponse.json();
                 
-                if (forecastData.forecast && forecastData.forecast.length > 0) {
-                    const latestForecast = forecastData.forecast[0];
-                    const ttf = latestForecast.ttf;
+                if (forecastData.current_ttf !== null && forecastData.forecast && forecastData.forecast.length > 0) {
+                    const ttf = forecastData.current_ttf;
                     const risk = getRiskLevel(ttf);
                     
                     document.getElementById('result-ttf').textContent = ttf.toFixed(2);
@@ -500,6 +499,7 @@ async def get_forecast(
     """
     Get fire risk forecast for a location.
     Accepts either coordinates or common location names.
+    Returns current fire risk based on actual weather + 7-day forecast trend.
     """
     # Common Norwegian locations
     locations_map = {
@@ -530,30 +530,60 @@ async def get_forecast(
         )
     
     try:
-        # Fetch 7 days of weather data for fire risk computation
-        # (Fire risk model needs multiple data points to simulate wood moisture changes over time)
-        logger.info(f"Fetching 7-day forecast for lat={lat}, lon={lon} for fire risk computation")
+        # Fetch current weather to get baseline fire risk
+        logger.info(f"Fetching current weather for lat={lat}, lon={lon}")
+        current_weather = await fetch_met_latest(lat, lon, altitude=None)
+        
+        # Fetch 7 days of weather data for fire risk trend computation
+        # (Fire risk model simulates wood moisture changes over time)
+        logger.info(f"Fetching 7-day forecast for lat={lat}, lon={lon} for fire risk trend")
         weather_points = await fetch_met_forecast(lat, lon, altitude=None, days=7)
         
         if not weather_points or len(weather_points) < 2:
             raise ValueError(f"Insufficient weather data: got {len(weather_points)} points, need at least 2 for fire risk computation")
         
-        logger.info(f"Computing fire risk with {len(weather_points)} weather data points for lat={lat}, lon={lon}")
+        logger.info(f"Computing fire risk forecast with {len(weather_points)} weather data points for lat={lat}, lon={lon}")
         
         # Convert to WeatherData format
         from frcm.datamodel.utils import list_to_wdps
         data_points = list_to_wdps(weather_points)
         weather_obj = WeatherData(data=data_points)
         
-        # Calculate fire risk
+        # Calculate fire risk trend
         fire_risk = compute(weather_obj)
         
-        logger.info(f"Successfully computed fire risk with {len(fire_risk.firerisks)} TTF values for {location or f'({lat}, {lon})'}")
+        # Create current fire risk point based on actual current conditions
+        # We compute a single-point fire risk using just the current weather
+        current_point = {
+            "timestamp": current_weather["timestamp"],
+            "temperature": current_weather["temperature"],
+            "humidity": current_weather["humidity"],
+            "wind_speed": current_weather["wind_speed"]
+        }
+        current_data_point = WeatherDataPoint(
+            timestamp=current_weather["timestamp"],
+            temperature=current_weather["temperature"],
+            humidity=current_weather["humidity"],
+            wind_speed=current_weather["wind_speed"]
+        )
+        # Create a 48-hour window around current time using forecast data
+        # to give the model enough data for realistic wood moisture computation
+        current_and_future = [current_point] + weather_points[:48]  # ~2 days including current
+        current_data_points = list_to_wdps(current_and_future)
+        current_weather_obj = WeatherData(data=current_data_points)
+        current_fire_risk = compute(current_weather_obj)
+        
+        # Extract current TTF (first value computed from current conditions)
+        current_ttf = current_fire_risk.firerisks[0].ttf if current_fire_risk.firerisks else None
+        
+        logger.info(f"Successfully computed fire risk for {location or f'({lat}, {lon})'}: current_ttf={current_ttf}, forecast_points={len(fire_risk.firerisks)}")
         
         return {
             "location": location or f"({lat}, {lon})",
             "latitude": lat,
             "longitude": lon,
+            "current_ttf": current_ttf,
+            "current_weather": current_point,
             "data_points": len(weather_points),
             "forecast": [
                 {

@@ -33,7 +33,7 @@ def compute(wd: dm.WeatherData) -> dm.FireRiskPrediction:
 
 
 def compute_fr(temp_c_out, rh_out):
-
+    
     "Indoor temperature vector"
     temp_c_in = [mp.T_c_in] * len(temp_c_out)  # Potential future changes may involve dynamic in-home temperatures
 
