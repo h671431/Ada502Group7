@@ -32,10 +32,12 @@ Planned:
 Running the Web Application with Docker:
 Docker and Docker Compose needs to be installed
 >docker-compose up --build
+
 then open
 http://localhost:8000
 
 How to only run the Fire Risk Computation Model:
+
 'uv' needs to be installed
 
 >uv run python src/frcm/__main__.py ./bergen_2026_01_09.csv
@@ -72,7 +74,6 @@ These parameters are used together with the TTF-computation to calculate a fire 
 - Implement authentication and authorization for API endpoints
 - Integrate with additional weather data sources
 - Create a web dashboard for visualizing fire risk predictions
-- Add support for multiple regions and locations
 
 # CI/CD pipeline
 This project uses GitHub Actions for continious integration and deployment.
