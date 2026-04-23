@@ -1,6 +1,5 @@
 # Introduction
-
-FireGuard is a cloud-based services for predicting fire risk based on weather data. 
+FireGuard is a cloud-based service for predicting fire risk based on weather data. 
 The system uses a Fire Risk Computation model (FRCM) to calculate fire risk based on environmental conditions. 
 
 # System Overview
@@ -29,12 +28,19 @@ Planned:
 - Message broker for event-driven architecture
 - Authentication and authorization system 
 
-# How to run
+# How to run locally
+Running the Web Application with Docker:
+Docker and Docker Compose needs to be installed
+>docker-compose up --build
+then open
+http://localhost:8000
+
+How to only run the Fire Risk Computation Model:
 'uv' needs to be installed
 
->uv run python src/frcm/__main__.py/bergen_2026_01_09.csv
+>uv run python src/frcm/__main__.py ./bergen_2026_01_09.csv
 
-This runs the Fire Risk Computaion Model on weather data and outputs fire risk predictions
+This runs the Fire Risk Computation Model on weather data and outputs fire risk predictions
 
 # Landing Page
 The FireGuard landing page is hosted on NREC:
@@ -67,6 +73,17 @@ These parameters are used together with the TTF-computation to calculate a fire 
 - Integrate with additional weather data sources
 - Create a web dashboard for visualizing fire risk predictions
 - Add support for multiple regions and locations
+
+# CI/CD pipeline
+This project uses GitHub Actions for continious integration and deployment.
+
+The pipeline is automatically triggered on:
+- Push to the main branch
+
+Why CI/CD?
+- Ensures that the project builds successfully on every change
+En
+
 
 # Team
 Group 7: Hannah, Benjamin, and Mathias 
