@@ -1,6 +1,6 @@
 # Introduction
 FireGuard is a cloud-based service for predicting fire risk based on weather data. 
-The system uses a Fire Risk Computation model (FRCM) to calculate fire risk based on environmental conditions. 
+The system uses a Fire Risk Computation Model (FRCM) to calculate fire risk based on environmental conditions. 
 
 # System Overview
 The system consists of:
@@ -9,6 +9,7 @@ The system consists of:
 - REST API (partial)
 - Cloud hosting on NREC
 - Landing page
+- Web application (UI +API) accessible via browser
 
 # Current implementation
 Implemented:
@@ -20,10 +21,8 @@ Implemented:
 Partially:
 - REST API with FastAPI (endpoints available but still in development)
 - MET API integration for weather forecast data
-- Landing page served at /
 
 Planned:
-- Full cloud deployment on NREC
 - Database integration for storing fire risk predictions
 - Message broker for event-driven architecture
 - Authentication and authorization system 
@@ -33,7 +32,9 @@ Running the Web Application with Docker:
 Docker and Docker Compose needs to be installed
 >docker-compose up --build
 
-then open
+This builds and starts the application using Docker Compose.
+
+The web application will be available at:
 http://localhost:8000
 
 How to only run the Fire Risk Computation Model:
@@ -44,12 +45,18 @@ How to only run the Fire Risk Computation Model:
 
 This runs the Fire Risk Computation Model on weather data and outputs fire risk predictions
 
+Note:
+- The Docker setup runs the full web application
+- The Fire Risk Model can also be run independently using uv
 # Landing Page
-The FireGuard landing page is hosted on NREC:
+The FireGuard Web Application (UI + API) hosted on NREC:
 >http://158.37.63.59:8000/
 
 # Architecture
-Weather Data (CSV /MET API) -> FireGuard Service (planned API) -> Fire Risk Model (FRCM) -> Fire Risk Output
+Weather Data (CSV /MET API) 
+-> FireGuard Service (planned API) 
+-> Fire Risk Model (FRCM) 
+-> Fire Risk Output
 
 # Fire Risk Model
 The Fire Risk Computation Model calculates fire risk based on:
@@ -76,15 +83,15 @@ These parameters are used together with the TTF-computation to calculate a fire 
 - Create a web dashboard for visualizing fire risk predictions
 
 # CI/CD pipeline
-This project uses GitHub Actions for continious integration and deployment.
+This project uses GitHub Actions for continuous integration and deployment.
 
-The pipeline is automatically triggered on:
-- Push to the main branch
+The pipeline is triggered on push to the main branch and performs:
+- Build and validation of the project
+- Secure SSH connection to the NREC server
+- Pulling the latest code
+- Rebuilding and restarting Docker containers
 
-Why CI/CD?
-- Ensures that the project builds successfully on every change
-En
-
+This ensures that the deployed application is automatically updated when changes are pushed. 
 
 # Team
 Group 7: Hannah, Benjamin, and Mathias 
