@@ -54,8 +54,11 @@ The FireGuard Web Application (UI + API) hosted on NREC:
 
 # Architecture
 Weather Data (CSV /MET API) 
+
 -> FireGuard Service (planned API) 
+
 -> Fire Risk Model (FRCM) 
+
 -> Fire Risk Output
 
 # Fire Risk Model
