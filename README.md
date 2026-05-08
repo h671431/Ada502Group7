@@ -17,11 +17,10 @@ Implemented:
 - Weather data model with CSV parsing
 - Command-line interface for fire risk computation
 - Data preprocessing and utilities
-
-Partially:
-- REST API with FastAPI (endpoints available but still in development)
+- REST API with FastAPI (fully functional endpoints)
 - MET API integration for weather forecast data
-- Landing page served at /
+- Interactive landing page with map-based location selection
+- Real-time fire risk calculation through web UI
 
 Planned:
 - Full cloud deployment on NREC
@@ -30,18 +29,51 @@ Planned:
 - Authentication and authorization system 
 
 # How to run
-'uv' needs to be installed
 
->uv run python src/frcm/__main__.py/bergen_2026_01_09.csv
+**Command-line interface:**
+`uv` needs to be installed
+```
+uv run python src/frcm/__main__.py bergen_2026_01_09.csv
+```
+This runs the Fire Risk Computation Model on weather data and outputs fire risk predictions.
 
-This runs the Fire Risk Computaion Model on weather data and outputs fire risk predictions
-
-# Landing Page
-The FireGuard landing page is hosted on NREC:
->http://158.37.63.59:8000/
+**Web service:**
+```
+uv run python src/frcm/__main__.py
+```
+Starts the REST API server with interactive landing page at http://localhost:8000/
 
 # Architecture
-Weather Data (CSV /MET API) -> FireGuard Service (planned API) -> Fire Risk Model (FRCM) -> Fire Risk Output
+
+FireGuard is a multi-interface system for fire risk prediction:
+
+```
+Data Sources:
+  CSV File ──────┐
+                 ├─→ Fire Risk Computation Model (FRCM)
+  MET API ───────┤
+                 └─→ Fire Risk Output
+
+Interfaces:
+  1. Command-line:
+     $ uv run python src/frcm/__main__.py <csv_file> [output_file]
+
+  2. REST API Server (http://localhost:8000):
+     ├─ GET /api/weather?latitude=X&longitude=Y - Fetch weather forecast
+     ├─ GET /api/weather/latest?latitude=X&longitude=Y - Latest observation
+     └─ GET /api/forecast?latitude=X&longitude=Y - Fire risk forecast (uses FRCM)
+
+  3. Web UI:
+     ├─ Interactive map at /
+     ├─ Click to select location
+     └─ Displays fire risk visualization with TTF values
+```
+
+**Data flow:**
+1. Weather data sources (CSV or MET API) are fetched
+2. Data controller normalizes weather data
+3. Fire Risk Model computes risk based on temperature, humidity, wind, and TTF parameters
+4. Results are returned via CLI, REST API, or web UI
 
 # Fire Risk Model
 The Fire Risk Computation Model calculates fire risk based on:
