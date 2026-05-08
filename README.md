@@ -1,7 +1,6 @@
 # Introduction
-
-FireGuard is a cloud-based services for predicting fire risk based on weather data. 
-The system uses a Fire Risk Computation model (FRCM) to calculate fire risk based on environmental conditions. 
+FireGuard is a cloud-based service for predicting fire risk based on weather data. 
+The system uses a Fire Risk Computation Model (FRCM) to calculate fire risk based on environmental conditions. 
 
 # System Overview
 The system consists of:
@@ -10,6 +9,7 @@ The system consists of:
 - REST API (partial)
 - Cloud hosting on NREC
 - Landing page
+- Web application (UI +API) accessible via browser
 
 # Current implementation
 Implemented:
@@ -23,7 +23,6 @@ Implemented:
 - Real-time fire risk calculation through web UI
 
 Planned:
-- Full cloud deployment on NREC
 - Database integration for storing fire risk predictions
 - Message broker for event-driven architecture
 - Authentication and authorization system 
@@ -98,7 +97,17 @@ These parameters are used together with the TTF-computation to calculate a fire 
 - Implement authentication and authorization for API endpoints
 - Integrate with additional weather data sources
 - Create a web dashboard for visualizing fire risk predictions
-- Add support for multiple regions and locations
+
+# CI/CD pipeline
+This project uses GitHub Actions for continuous integration and deployment.
+
+The pipeline is triggered on push to the main branch and performs:
+- Build and validation of the project
+- Secure SSH connection to the NREC server
+- Pulling the latest code
+- Rebuilding and restarting Docker containers
+
+This ensures that the deployed application is automatically updated when changes are pushed. 
 
 # Team
 Group 7: Hannah, Benjamin, and Mathias 
