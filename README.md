@@ -42,6 +42,20 @@ uv run python src/frcm/__main__.py
 ```
 Starts the REST API server with interactive landing page at http://localhost:8000/
 
+**Web Services with Docker:**
+```
+docker compose up --build -d
+```
+This builds and starts the FireGuard web service in Docker. 
+The application is available at http://localhost:8000/
+
+To stop:
+```
+docker compose down
+```
+
+
+
 # Architecture
 
 FireGuard is a multi-interface system for fire risk prediction:
@@ -71,14 +85,14 @@ Interfaces:
 **Data flow:**
 1. Weather data sources (CSV or MET API) are fetched
 2. Data controller normalizes weather data
-3. Fire Risk Model computes risk based on temperature, humidity, wind, and TTF parameters
+3. Fire Risk Model computes risk based on temperature, relative humidity, wind speed, and TTF parameters
 4. Results are returned via CLI, REST API, or web UI
 
 # Fire Risk Model
 The Fire Risk Computation Model calculates fire risk based on:
 - Temperature
+- Humidity
 - Wind
-- Rain
 
 These parameters are used together with the TTF-computation to calculate a fire risk for a selected location/coordinate.
 # Technologies
