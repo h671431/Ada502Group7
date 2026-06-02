@@ -91,10 +91,11 @@ Interfaces:
 # Fire Risk Model
 The Fire Risk Computation Model calculates fire risk based on:
 - Temperature
-- Humidity
-- Wind
+- Relative umidity
+- Wind speed
 
-These parameters are used together with the TTF-computation to calculate a fire risk for a selected location/coordinate.
+These parameters are used together with the TTF-computation to calculate a fire risk for a selected location.
+
 # Technologies
 - **Python 3.13+** - Core language
 - **FastAPI** - REST API framework
@@ -113,15 +114,17 @@ These parameters are used together with the TTF-computation to calculate a fire 
 - Create a web dashboard for visualizing fire risk predictions
 
 # CI/CD pipeline
-This project uses GitHub Actions for continuous integration and deployment.
+This project uses GitHub Actions for continuous integration and continuous deployment (CI/CD).
 
-The pipeline is triggered on push to the main branch and performs:
-- Build and validation of the project
-- Secure SSH connection to the NREC server
-- Pulling the latest code
-- Rebuilding and restarting Docker containers
+The pipeline is automatically triggered when changes are pushed to the main branch.
+The wirkflow performms the following steps:
+1. Builds and validates the project
+2. Establishes a secure SSH connection to the NREC server
+3. Pulls the latest versjon of the repository on the server
+4. Rebuilds the Docker containers
+5. Restarts the application using Docker Compose
 
-This ensures that the deployed application is automatically updated when changes are pushed. 
+This process ensures that every successful update to the main branch is automatically deployed to the cloud environment.
 
 # Team
 Group 7: Hannah, Benjamin, and Mathias 
