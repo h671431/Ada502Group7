@@ -24,7 +24,7 @@ Implemented:
 - Real-time fire risk calculation through web UI
 
 Planned:
-- Database integration for storing fire risk predictions
+- PostgreSQL database for storing historical fire risk predictions
 - Message broker for event-driven architecture
 - Authentication and authorization system 
 
@@ -55,29 +55,41 @@ To stop:
 docker compose down
 ```
 
-
-
 # Architecture
 
 FireGuard is a multi-interface system for fire risk prediction:
 
+Weather data can be provided from two different sources:
+- CSV files
+- MET API
+
+The data controller fetches and normalizes the weather data before it is passed to the FRCM. This ensures that the model receives data in a consistent format regardless of the source. 
 ```
-Data Sources:
-  CSV File ──────┐
-                 ├─→ Fire Risk Computation Model (FRCM)
-  MET API ───────┤
-                 └─→ Fire Risk Output
+CSV file --------
+                |
+                v
+MET API --> Data controller --> Fire Risk Computation Model
+                                      |
+                                      v
+                              Fire Risk Output
+                                      |
+                            ----------|----------
+                           |          |          |
+                           v          v          v
+                          CLI     REST API     Web UI
+```
+The fire risk result can be accessed through three interfaces:
 
-Interfaces:
-  1. Command-line:
+```
+  1. Command-line: (For running calculations from CSV files)
      $ uv run python src/frcm/__main__.py <csv_file> [output_file]
-
-  2. REST API Server (http://localhost:8000):
+ 
+  2. REST API Server (http://localhost:8000): (For accessing weather data and fire risk forecasts)
      ├─ GET /api/weather?latitude=X&longitude=Y - Fetch weather forecast
      ├─ GET /api/weather/latest?latitude=X&longitude=Y - Latest observation
      └─ GET /api/forecast?latitude=X&longitude=Y - Fire risk forecast (uses FRCM)
 
-  3. Web UI:
+  3. Web UI: 
      ├─ Interactive map at /
      ├─ User selects location
      └─ System displays fire risk and TTF values
@@ -85,9 +97,9 @@ Interfaces:
 
 **Data flow:**
 1. Weather data is fetched from CSV or MET API
-2. Data controller normalizes weather data
+2. The data controller normalizes weather data
 3. Fire Risk Computation Model calculates fire risk using temperature, relative humidity, wind speed, and TTF parameters
-4. Results is returned through the CLI, REST API, or Web UI
+4. The result is returned through the CLI, REST API, or Web UI
 
 # Fire Risk Model
 The Fire Risk Computation Model calculates fire risk based on:
@@ -95,7 +107,7 @@ The Fire Risk Computation Model calculates fire risk based on:
 - Relative humidity
 - Wind speed
 
-These parameters are used together with the TTF-computation to calculate a fire risk for a selected location.
+These parameters are used together with the TTF computation to estimate a fire risk for a selected location.
 
 # Technologies
 - **Python 3.13+** - Core language
@@ -118,14 +130,16 @@ These parameters are used together with the TTF-computation to calculate a fire 
 This project uses GitHub Actions for continuous integration and continuous deployment (CI/CD).
 
 The pipeline is automatically triggered when changes are pushed to the main branch.
-The workflow performms the following steps:
+The workflow performs the following steps:
 1. Builds and validates the project
 2. Establishes a secure SSH connection to the NREC server
 3. Pulls the latest version of the repository on the server
 4. Rebuilds the Docker containers
 5. Restarts the application using Docker Compose
 
-This process ensures that every successful update to the main branch is automatically deployed to the cloud environment.
+The CI workflow also runs on pushes and pull requests to validate the project before deployment.
+
+This process ensures that code changes are automatically validated and that updates to main are deployed to the cloud environment. 
 
 # Team
 Group 7: Hannah, Benjamin, and Mathias 
