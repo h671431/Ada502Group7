@@ -18,7 +18,7 @@ Implemented:
 - Weather data model with CSV parsing
 - Command-line interface for fire risk computation
 - Data preprocessing and utilities
-- REST API with FastAPI (fully functional endpoints)
+- REST API with FastAPI 
 - MET API integration for weather forecast data
 - Interactive landing page with map-based location selection
 - Real-time fire risk calculation through web UI
