@@ -3,13 +3,14 @@ FireGuard is a cloud-based service for predicting fire risk based on weather dat
 The system uses a Fire Risk Computation Model (FRCM) to calculate fire risk based on environmental conditions. 
 
 # System Overview
-The system consists of:
-- Fire Risk Computation Model 
-- Weather data input (CSV or MET API)
-- REST API 
-- Cloud hosting on NREC
-- Landing page
-- Web application (UI +API) accessible via browser
+FireGuard consists of:
+
+- Fire Risk Computation Model (FRCM)
+- Weather data input from CSV or MET API
+- Data controller for normalizing weather data
+- FastAPI REST API 
+- Interactive Web UI
+- Docker-based deployment on NREC
 
 # Current implementation
 Implemented:
@@ -42,7 +43,7 @@ uv run python src/frcm/__main__.py
 ```
 Starts the REST API server with interactive landing page at http://localhost:8000/
 
-**Web Services with Docker:**
+**Web Service with Docker:**
 ```
 docker compose up --build -d
 ```
@@ -78,20 +79,20 @@ Interfaces:
 
   3. Web UI:
      ├─ Interactive map at /
-     ├─ Click to select location
-     └─ Displays fire risk visualization with TTF values
+     ├─ User selects location
+     └─ System displays fire risk and TTF values
 ```
 
 **Data flow:**
-1. Weather data sources (CSV or MET API) are fetched
+1. Weather data is fetched from CSV or MET API
 2. Data controller normalizes weather data
-3. Fire Risk Model computes risk based on temperature, relative humidity, wind speed, and TTF parameters
-4. Results are returned via CLI, REST API, or web UI
+3. Fire Risk Computation Model calculates fire risk using temperature, relative humidity, wind speed, and TTF parameters
+4. Results is returned through the CLI, REST API, or Web UI
 
 # Fire Risk Model
 The Fire Risk Computation Model calculates fire risk based on:
 - Temperature
-- Relative umidity
+- Relative humidity
 - Wind speed
 
 These parameters are used together with the TTF-computation to calculate a fire risk for a selected location.
@@ -117,10 +118,10 @@ These parameters are used together with the TTF-computation to calculate a fire 
 This project uses GitHub Actions for continuous integration and continuous deployment (CI/CD).
 
 The pipeline is automatically triggered when changes are pushed to the main branch.
-The wirkflow performms the following steps:
+The workflow performms the following steps:
 1. Builds and validates the project
 2. Establishes a secure SSH connection to the NREC server
-3. Pulls the latest versjon of the repository on the server
+3. Pulls the latest version of the repository on the server
 4. Rebuilds the Docker containers
 5. Restarts the application using Docker Compose
 
