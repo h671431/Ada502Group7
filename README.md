@@ -4,9 +4,9 @@ The system uses a Fire Risk Computation Model (FRCM) to calculate fire risk base
 
 # System Overview
 The system consists of:
-- Fire Risk Computation Model (implemented)
+- Fire Risk Computation Model 
 - Weather data input (CSV or MET API)
-- REST API (partial)
+- REST API 
 - Cloud hosting on NREC
 - Landing page
 - Web application (UI +API) accessible via browser
